@@ -43,3 +43,90 @@ La accion solo puede ser respondida por código o alguna otra API response.
 Hay una muestra de interacción entre el usuario y el bot, definida en terminos de catura de intención y ejecución de acciones. Así, el desarrollador puede mensionar que hacer si obtienes una **Input** de alguna **Intent** con/sin algunas **entities**. Es como decir si la **intención(Intent)** del usuario es encontrar el día de la semana y la entity es **(hoy)today**, el bot encontrará el dia de la semana de hoy y responda.
 ## Domain
 Se requiere el conocimiento del dominio para responder a cualquier usuario. Significa que cuando tu respondas algo al usuario tu deberias saber de lo que estas hablando.
+
+# ¿Cómo definimos todo esto en código?
+nlu.md (Intent and entity)
+```python
+nlu:
+- intent: greet
+  examples: |
+    - hey
+    - hello
+- entity: book
+  examples:
+		- Odisea
+```
+stories.md (Story (Dialogue Management))
+```python
+stories:
+- story: generic happy path
+  steps:
+  - intent: greet
+  - action: action_greet
+  - intent: select_price
+  - action: action_select_upper_price
+  - intent: select_purpose
+  - action: action_select_purpose
+  - intent: select_brand
+  - action: action_select_brand
+```
+domain.yml (Actual output (Hard Code) [All intents, entity, action, response])
+```python
+rules:
+
+- rule: always greet the user
+  steps:
+    - intent: greet
+    - action: action_greet
+```
+actions.py (Custom reply)
+```python
+class ActionGreet(Action):
+    def name(self) -> Text:
+        return 'action_greet'
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        dispatcher.utter_message(template='utter_greet')
+        dispatcher.utter_message(template='utter_price')
+        return []
+```
+
+El ``domains.yml`` es el que conecta a todos los archivos, es el que va a tener toda la información de los [All intents, entity, action, templates, response]
+
+# Herramientas importantes
+## Rasa NLU
+Es una libreria para NLU el cual toma el input user e intenta inferir la intención y extraer las entidades disponibles y ayuda al bot a entender lo que el usuario esta intentando decir.
+
+### El principal trabajo de la NLU
+* Training data format
+* Lenguage support
+* Choosing a Pipeline
+* Entity Extraction
+
+ejemplo:
+"*I am looking for a Mexican restaurant in the centre of town*"
+
+```json
+{
+	"intent": "search_restaurant",
+	"entities": {
+		"cuisine": "Mexican",
+		"location": "center"
+	}
+}
+```
+# Rasa Core
+(Manejo del dialogo) es un dialog management ML based solution, el cual toma la estructura del input del NLU e intenta construir un modelo de probabilidad el cual decide el conjunto de acciones para ejecutar en base a los conjuntos previos de los user inputs 
+### Rasa core trabaja:
+* Dialog Engine
+* Stories
+* Domain
+* Response
+* Action
+* Slots
+* Form
+* Knowledge Base Actions
+
+
