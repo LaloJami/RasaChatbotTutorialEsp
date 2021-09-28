@@ -10,6 +10,9 @@ intents:
   - bot_challenge
   - hello_world
 
+actions:
+  - action_hello_world
+
 responses:
   utter_greet:
   - text: "Hey! How are you?"
@@ -29,9 +32,6 @@ responses:
 
   utter_iamabot:
   - text: "I am a bot, powered by Rasa."
-
-  utter_hello_world:
-  - text: "this is hello world response :)"
 
 session_config:
   session_expiration_time: 60

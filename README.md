@@ -173,7 +173,7 @@ Al iniciar el proyecto se nos crearon nuevos directorios como actions, data, mod
 # Implementacion de acciones personalizadas
 Para hacer esta implementación, primero vamos a hacer un pequeño ejercicio, vamos a hacer un hello world usando chatbot. 
 
-En el archivo ``nlu.yml`` agregamos lo siguiente
+En el archivo ``/data/nlu.yml`` agregamos lo siguiente
 ```python
 - intent: hello_world
   examples: |
@@ -181,14 +181,14 @@ En el archivo ``nlu.yml`` agregamos lo siguiente
     - programming
     - first program
 ```
-Ahora, en el archivo ``stories.yml`` 
+Ahora, en el archivo ``/data/stories.yml`` 
 ```python
 - story: hello world
   steps:
   - intent: hello_world
   - action: utter_hello_world
 ```
-Lo siguiente es editar el ``domain.yml``
+Lo siguiente es editar el ``/domain.yml``
 ```python
 intents:
 	- hello_world
@@ -212,4 +212,83 @@ this is hello world response :)
 Your input ->
 ```
 
-Ahora vamos a crear una acción con el mismo concepto del hello world, para ello en el archivo `domain.yml` eliminamos la **respuesta** ``utter_hello_world`` que hicimos anteriormente
+Ahora vamos a crear una acción con el mismo concepto del hello world, para ello en el archivo `/domain.yml` eliminamos la **respuesta** ``utter_hello_world`` que hicimos anteriormente
+y agregamos la siguiente linea antes de `responses:`
+```python
+actions:
+  - action_hello_world
+```
+Despues, en el archivo ``/data/stories.yml`` cambiamos el keyword **utter** por **action**
+```python
+- story: hello world
+  steps:
+  - intent: hello_world
+  - action: action_hello_world
+```
+
+ahora nos vamos al archivo `/actions/actions.py` y descomentamos los import y la clase.
+```python
+from typing import Any, Text, Dict, List
+
+from rasa_sdk import Action, Tracker
+from rasa_sdk.executor import CollectingDispatcher
+
+
+class ActionHelloWorld(Action):
+
+    def name(self) -> Text:
+        return "action_hello_world"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        dispatcher.utter_message(text="Hello World! this is my first action python code!")
+
+        return []
+
+```
+El siguiente paso es ir a `/endpoints.yml` y descomentar ``action_endpoint``
+```python
+action_endpoint:
+ url: "http://localhost:5055/webhook"
+```
+lo siguiente es reentrenar los datos 
+```
+$ rasa train
+```
+y ahora en otra terminal corre las acciones
+```
+$ rasa run actions
+```
+cuando se termine de entrenar puedes probar tu acción usando la shell
+```
+$ rasa shell
+```
+```
+Your input -> world                       
+Hello World! this is my first action python code!
+Your input ->
+```
+ahora si vamos al archivo ``/actions/actions.py``y agregamos un print al código
+```python
+class ActionHelloWorld(Action):
+
+    def name(self) -> Text:
+        return "action_hello_world"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        print("I am from action py file") ## Mi modificacion
+        dispatcher.utter_message(text="Hello World! this is my first action python code!")
+
+        return []
+```
+basta con detener mi `rasa run actions` y volverlo a ejecutar para ver los cambios.
+```
+To ensure compatibility use the same version for both, modulo the last number, i.e. using version A.B.x the numbers A and B should be identical for both rasa and rasa_sdk.
+  f"Your versions of rasa and "
+I am from action py file
+```
