@@ -45,7 +45,7 @@ Hay una muestra de interacción entre el usuario y el bot, definida en terminos 
 Se requiere el conocimiento del dominio para responder a cualquier usuario. Significa que cuando tu respondas algo al usuario tu deberias saber de lo que estas hablando.
 
 # ¿Cómo definimos todo esto en código?
-nlu.md (Intent and entity)
+nlu.yml (Intent and entity)
 ```python
 nlu:
 - intent: greet
@@ -56,7 +56,7 @@ nlu:
   examples:
 		- Odisea
 ```
-stories.md (Story (Dialogue Management))
+stories.yml (Story (Dialogue Management))
 ```python
 stories:
 - story: generic happy path
@@ -128,5 +128,31 @@ ejemplo:
 * Slots
 * Form
 * Knowledge Base Actions
+# Arquitectura de Rasa
+Los pasos son:
+1. el mensaje es recibido y pasado a un interprete, el cual lo convierte en un diccionario incluyendo el texto original, la intención, y cualquier entidad que encontremos. Esta parte es manejada por la NLU.
+2. El **Tracker** es el objeto el cual guarda track del estado de la conversación. Esta recibe la informacion de que un nuevo mensaje a llegado
+3. El **policy** recibe el estado actual del **Tracker**
+4. El **policy** escoge la acción a tomar acontinuación.
+5. La **action** escogida es registrada por el **tracker**
+6. Una respuesta es enviada al usuario.
+# Install Rasa
+
+Recomiendo crear un env en conda, Rasa trabaja bien con python 3.7 y 3.8, por ahora no hay soporte para python 3.9
+```
+$ conda create --name <env_name> python=3.7
+```
+una vez creado el env activarlo
+```
+$ conda activate <env_name>
+```
+instala rasa
+```
+$ pip install rasa
+```
+inicia un proyecto en rasa
+```
+$ rasa init --no-prompt
+```
 
 
