@@ -35,3 +35,11 @@ Otro ejemplo:
 "*Reserve a table at Hilton Colon Hotel tomorrow night*"
 * Intent: Reserve a table
 * Entity: place: Hilton Colon Hotel and time: tomorrow night
+## Action
+Es una operacion la cual puede ser ejecutada por el **bot**. Este puede responder con algo, consultar en la base de datos o cualquier otra cosa posible por código.
+
+La accion solo puede ser respondida por código o alguna otra API response.
+## Stories
+Hay una muestra de interacción entre el usuario y el bot, definida en terminos de catura de intención y ejecución de acciones. Así, el desarrollador puede mensionar que hacer si obtienes una **Input** de alguna **Intent** con/sin algunas **entities**. Es como decir si la **intención(Intent)** del usuario es encontrar el día de la semana y la entity es **(hoy)today**, el bot encontrará el dia de la semana de hoy y responda.
+## Domain
+Se requiere el conocimiento del dominio para responder a cualquier usuario. Significa que cuando tu respondas algo al usuario tu deberias saber de lo que estas hablando.
