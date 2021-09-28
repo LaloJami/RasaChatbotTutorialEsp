@@ -2,7 +2,8 @@
 <h1>Rasa Chatbot Tutorial Español</h1>
 </div>
 
-Este tutorial fue realizado para tener un punto de partida para todas las personas de habla hispana que deseen aprender sobre Rasa 
+Este tutorial fue realizado para tener un punto de partida para todas las personas de habla hispana que deseen aprender sobre Rasa.
+
 Esta basado principalmente del tutorial de [Binod Suman Academy](https://www.youtube.com/watch?v=Z9zTJS6cWiQ)
 
 # ¿Qué es Rasa?
@@ -52,9 +53,6 @@ nlu:
   examples: |
     - hey
     - hello
-- entity: book
-  examples:
-		- Odisea
 ```
 stories.yml (Story (Dialogue Management))
 ```python
@@ -137,7 +135,7 @@ Los pasos son:
 4. El **policy** escoge la acción a tomar acontinuación.
 5. La **action** escogida es registrada por el **tracker**
 6. Una respuesta es enviada al usuario.
-# Install Rasa
+# Instalar Rasa y empezar un proyecto
 
 Recomiendo crear un env en conda, Rasa trabaja bien con python 3.7 y 3.8, por ahora no hay soporte para python 3.9
 ```
@@ -157,10 +155,12 @@ $ rasa init --no-prompt
 ```
 Una vez iniciado el proyecto puedes interactuar con el bot usando el siguiente comando
 ```
-rasa shell
+$ rasa shell
 ```
 si tu data o tu domain cambia necesitaras reentrenar tu modelo para ver los cambios
-
+```
+$ rasa train
+```
 ### Observaiones
 Al iniciar el proyecto se nos crearon nuevos directorios como actions, data, models, tests, y otros archivos 
 
