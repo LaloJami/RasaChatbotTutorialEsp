@@ -170,3 +170,46 @@ Al iniciar el proyecto se nos crearon nuevos directorios como actions, data, mod
 * **Archivos**: estos archivos son generados por rasa
 	* **domain.yml**: es el archivo que va a tener toda la información de los [All intents, entity, action, templates, response]
 
+# Implementacion de acciones personalizadas
+Para hacer esta implementación, primero vamos a hacer un pequeño ejercicio, vamos a hacer un hello world usando chatbot. 
+
+En el archivo ``nlu.yml`` agregamos lo siguiente
+```python
+- intent: hello_world
+  examples: |
+    - world
+    - programming
+    - first program
+```
+Ahora, en el archivo ``stories.yml`` 
+```python
+- story: hello world
+  steps:
+  - intent: hello_world
+  - action: utter_hello_world
+```
+Lo siguiente es editar el ``domain.yml``
+```python
+intents:
+	- hello_world
+
+responses:
+	utter_hello_world:
+  - text: "this is hello world response :)"
+```
+una vez terminado hay que reentrenar
+```
+$ rasa train
+```
+cuando este listo vamos a probarlo usando la shell
+```
+$ rasa shell
+```
+y ahora probamos nuestro hello world
+```
+Your input -> world                       
+this is hello world response :)
+Your input ->
+```
+
+Ahora vamos a crear una acción con el mismo concepto del hello world, para ello en el archivo `domain.yml` eliminamos la **respuesta** ``utter_hello_world`` que hicimos anteriormente

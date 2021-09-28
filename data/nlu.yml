@@ -17,6 +17,12 @@ nlu:
     - goodevening
     - good afternoon
 
+- intent: hello_world
+  examples: |
+    - world
+    - programming
+    - first program
+
 - intent: goodbye
   examples: |
     - good afternoon
