@@ -72,12 +72,13 @@ stories:
 ```
 domain.yml (Actual output (Hard Code) [All intents, entity, action, response])
 ```python
-rules:
+responses:
+  utter_greet:
+  - text: "Hey! How are you?"
 
-- rule: always greet the user
-  steps:
-    - intent: greet
-    - action: action_greet
+  utter_cheer_up:
+  - text: "Here is something to cheer you up:"
+    image: "https://i.imgur.com/nGF1K8f.jpg"
 ```
 actions.py (Custom reply)
 ```python
@@ -154,5 +155,18 @@ inicia un proyecto en rasa
 ```
 $ rasa init --no-prompt
 ```
+Una vez iniciado el proyecto puedes interactuar con el bot usando el siguiente comando
+```
+rasa shell
+```
+si tu data o tu domain cambia necesitaras reentrenar tu modelo para ver los cambios
 
+### Observaiones
+Al iniciar el proyecto se nos crearon nuevos directorios como actions, data, models, tests, y otros archivos 
+
+* **actions**: En este directorio encontraremos el archivo ``actions.py`` donde podemos programar en codigo la respuesta del bot.
+* **data**: En este directorio encontraremos los archivos ``nlu.yml``, ``rules.yml`` y ``stories.yml`` los cuales contendran las reglas e información escencial para el funcionamiento del chatbot.
+* **models**: Directorio donde se guardara los datos compilados del entrenamiento en archivos tipo .tar.gz
+* **Archivos**: estos archivos son generados por rasa
+	* **domain.yml**: es el archivo que va a tener toda la información de los [All intents, entity, action, templates, response]
 
