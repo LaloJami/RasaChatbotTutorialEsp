@@ -24,3 +24,5 @@ share/python-wheels/
 *.egg
 
 __pycache__
+
+enginedb.py

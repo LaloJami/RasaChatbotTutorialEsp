@@ -292,3 +292,147 @@ To ensure compatibility use the same version for both, modulo the last number, i
   f"Your versions of rasa and "
 I am from action py file
 ```
+# Conexión con una base de datos usando SQLAlchemy
+## 1. Instala SQLAlchemy y PostgreSQL
+```
+pip install SQLAlchemy
+```
+En este caso yo estoy usando la version 12 de postgresql e instalandola en ubuntu, si deseas instalar otras versiones o en un SO diferente visita su [página](https://www.postgresql.org/download/)
+```
+pip install posgresql-12
+```
+**Es extremadamente importante que tu anotes tu login y password que usas cuando configuras PostgreSQL porque lo necesitaras en la connexión con TablePlus y Python**
+Pasos para inicial postgreSQL en WSL
+```
+sudo service postgresql start
+sudo -u postgres psql
+```
+Tambien se puede iniciar de la siguiente forma
+```
+su - postgres
+psql
+```
+# 2. Crea Nuevo usuario (opcional)
+Necesitas entrar a la consola de postgre
+```
+su - postgres
+psql
+```
+para crear un usuario con contraseña 
+```
+createuser --interactive --pwprompt
+```
+Para dar acceso al nuevo usuario a tu base de datos 
+```
+grant all privileges on database sample_db to user_name;
+```
+Listar todos los usuarios en postgres
+```
+\du
+```
+
+# Creation of the database in PostgresSQL
+Antes de empezar crearemos una base de datos y unas tablas para probar SQLAlchemy
+Crear una base de datos
+```
+CREATE DATABASE flight;
+```
+# Create Tables and Insert values by using PostgresSQL
+
+nos conectamos a la base de datos creada
+```
+\connect flight;
+# o tambien 
+\c flight;
+```
+Ahora que estamos en la BD crearemos una tabla Flights con los atributos id, origin, destination, y duration
+```
+CREATE TABLE flights (
+    id SERIAL PRIMARY KEY,
+    origin VARCHAR NOT NULL,
+    destination VARCHAR NOT NULL,
+    duration INTEGER NOT NULL
+);
+```
+para crear una tabla sin atributos basta con poner
+```
+CREATE TABLE flights();
+```
+Para ver tus tablas usas el siguiente comando
+```
+\dt
+```
+Ahora vamos a insertar unos valores a nuestra tabla
+```
+INSERT INTO flights (origin, destination, duration) VALUES ('New York', 'London', 415);
+INSERT INTO flights (origin, destination, duration) VALUES ('Shanghai', 'Paris', 760);
+INSERT INTO flights (origin, destination, duration) VALUES ('Istanbul', 'Tokyo', 700);
+INSERT INTO flights (origin, destination, duration) VALUES ('New York', 'Paris', 435);
+```
+Si deseas ver tus datos ingresados usamos el siguiente query
+```
+SELECT * FROM flights;
+```
+> Importante no olvidarse del `;` al final de cada query
+
+# Create Tables and insert values by using SQLAlchemy
+Para realizar este ejercicio necesitas haber creado una BD anteriormente, para la conexión con python necesitamos crearnos un script donde se realizara las configuraciones necesarias para conectar a tu BD en postgres.
+
+Creamos un archivo .py y ponemos lo siguiente
+```py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+engine = create_engine("postgresql://login:password@localhost:5432/flight")
+```
+El formato para crear un engine es 
+```py
+create_engine(“postgresql://login:password@localhost:5432/name_database”)
+```
+En este ejemplo vamos a trabajar en la BD flight ya creada, no te olvides de cambiar login y password por los que creaste en postgres al momento de instalarlo.
+
+Ahora, necesitamos crear una tabla y atributos pero tambien insertar valores a esa tabla. Primero, necesitamos crear una sesion con el siguiente comando
+```py
+db = scoped_session(sessionmaker(bind=engine))
+```
+No es relevante para este ejemplo pero es muy importante para los ejemplos futuros que estaremos haciendo. *¿Por qué lo necesitamos?* Por ejemplo si tenemos un proyecto donde muchas personas ingresan a la BD del proyecto simultaneamente, queremos asegurarnos de que cada persona mantenga sus cosas separadas de las demas, si un sujeto A trabaja este no afecte al sujeto B que tambien realiza su trabajo.
+
+Ahora necesitamos correr la siguiente linea para crear una tabla `flights` con atributos id, origin, destination y duration. Ten cuidado, la sintaxis es un poco diferente de postgres, necesitamos declara la key al final.
+```py
+# to create the table flights with all the attributes
+db.execute("CREATE TABLE test (id INTEGER NOT NULL, origin VARCHAR NOT NULL, destination VARCHAR NOT NULL, duration INTEGER NOT NULL, PRIMARY KEY (id));")
+# to insert values into the table flights 
+db.execute("INSERT INTO flights (origin, destination, duration) VALUES ('New York', 'London', 415);")
+db.execute("INSERT INTO flights (origin, destination, duration) VALUES ('Shanghai', 'Paris', 760);")
+db.execute("INSERT INTO flights (origin, destination, duration) VALUES ('Istanbul', 'Tokyo', 700);")
+db.execute("INSERT INTO flights (origin, destination, duration) VALUES ('New York', 'Paris', 435);")
+```
+Entonces para ejecutarlo en postgresql.serve necesitamos hacer commit a los cambios
+```py
+db.commit()
+```
+Finalmente cerrar la sesion
+```py
+db.close()
+```
+Asi te quedaria todo el documento .py
+```py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+# creation of an engine
+engine = create_engine("postgresql://login:password@localhost:5432/flight")
+# creation of a session
+db = scoped_session(sessionmaker(bind=engine))
+# creation of the table flights with all the attributes
+db.execute("CREATE TABLE test (id INTEGER NOT NULL, origin VARCHAR NOT NULL, destination VARCHAR NOT NULL, duration INTEGER NOT NULL, PRIMARY KEY (id));")
+# insertion of values into the table flights 
+db.execute("INSERT INTO flights (origin, destination, duration) VALUES ('New York', 'London', 415);")
+db.execute("INSERT INTO flights (origin, destination, duration) VALUES ('Shanghai', 'Paris', 760);")
+db.execute("INSERT INTO flights (origin, destination, duration) VALUES ('Istanbul', 'Tokyo', 700);")
+db.execute("INSERT INTO flights (origin, destination, duration) VALUES ('New York', 'Paris', 435);")
+# commit the changes 
+db.commit()
+# close the session
+db.close()
+```
+
+
