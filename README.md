@@ -292,3 +292,112 @@ To ensure compatibility use the same version for both, modulo the last number, i
   f"Your versions of rasa and "
 I am from action py file
 ```
+
+# Agregar opciones multiples al chatbot y que aparezca en facebook
+Vamos a hacer que nuestro chatbot muestre un menu al usuario, para realizar esta acción hay que modificar los siguientes archivos 
+`data/nlu/nlu.yml`
+```py
+- intent: select_menu
+  examples: |
+    - Servicios
+    - Planifiquemos mi página web
+    - Comunicarse con un representante
+```
+`data/rules/rules.yml`
+```py
+- rule: grab menu
+  steps:
+    - intent: select_menu
+    - action: action_select_menu
+```
+`data/stories/stories.yml`
+```py
+stories:
+- story: generic happy path
+  steps:
+  ...
+  - intent: select_menu
+  - action: action_select_menu
+```
+`domain.yml`
+```py
+intents:
+  ...
+  - select_menu
+# estas son como los keys que se van a seleccionar
+slots:
+  menu:
+    type: categorical
+    values:
+      - Servicios
+      - Planifiquemos
+      - Comunicarse
+    influence_conversation: true
+# Aqui definimos el texto que se va a presentar en el mensaje de facebook
+responses:
+  ...
+  utter_menu:
+    #el campo text es lo que se le muestra al usuario
+    - text: ¿Cómo te puedo ayudar?
+      buttons:
+      - title: Servicios
+        payload: /select_menu{{"menu":"Servicios"}}
+      - title: Planifiquemos mi página web
+        payload: /select_menu{{"menu":"Planifiquemos"}}
+      - title: Comunicarse con un representante
+        payload: /select_menu{{"menu":"Comunicarse"}}
+  
+  utter_servicios:
+    - text: ¿En que te podemos servir?
+  utter_planificacion:
+    - text: ¿Qué deseas planificar?
+  utter_representante:
+    - text: ¿Por cual medio deseas comunicarte?
+# No olvides de agregar la accion
+actions:
+  ...
+  - action_select_menu
+```
+`actions/actions.py`
+```py
+# Agregamos que aparezca el menu cuando nos saluden
+class ActionGreet(Action):
+    def name(self) -> Text:
+        return 'action_greet'
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        dispatcher.utter_message(template='utter_greet')
+        dispatcher.utter_message(template='utter_menu')
+        return []
+# creamos una accion donde seleccionamos la respuesta dependiendo la opcion del usuario
+class ActionSelectMenu(Action):
+    def name(self) -> Text:
+        return 'action_select_menu'
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        menu = tracker.slots['menu']
+        if menu == "Servicios":
+            dispatcher.utter_message(template='utter_servicios_menu')
+            return [SlotSet('menu', menu)]
+        elif menu == "Planifiquemos":
+            dispatcher.utter_message(template='utter_planificacion')
+            return [SlotSet('menu', menu)]
+        elif menu == "Comunicarse":
+            dispatcher.utter_message(template='utter_representante')
+            return [SlotSet('menu', menu)]
+        else:
+            dispatcher.utter_message(template='utter_default')
+            return []
+```
+### Observaciones de este ejercicio
+* En facebook solo te da la opcion de presentar 3 opciones en un mensaje
+* si agregas una cuarta opcion en la parte de respone en el archivo `domain.yml` este no aparecera en el chat de facebook, pero si aparecera en la shell de rasa.
+* cuando crees las respuestas en el archivo `domain.yml` tu puedes escribir lo que el usuario va a leer en el atributo title y text, no es obligatorio que estos coincidan con lo que escribiste en **slots**.
+
+
+
+
