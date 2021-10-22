@@ -398,6 +398,92 @@ class ActionSelectMenu(Action):
 * si agregas una cuarta opcion en la parte de respone en el archivo `domain.yml` este no aparecera en el chat de facebook, pero si aparecera en la shell de rasa.
 * cuando crees las respuestas en el archivo `domain.yml` tu puedes escribir lo que el usuario va a leer en el atributo title y text, no es obligatorio que estos coincidan con lo que escribiste en **slots**.
 
+# Conexión con una base de datos
+Para usar la informacion de una base de datos vamos a configurarlo de la siguiente manera.
 
+Para este ejercicio usaremos `sqlite` y crearemos un archivo donde guardaremos los queries que vayamos a necesitar.
 
+Vamos a crear una tabla (si no existe) y agregaremos datos a esta.
 
+`./base_datos.py`
+```py
+import sqlite3
+def newdatabase():
+    conexion = sqlite3.connect("database_01.db")
+    c = conexion.cursor()
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS condador (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name_1 TEXT NOT NULL,  
+        service_id_2 TEXT NOT NULL,
+        fecha_3 TIMESTAMP NOT NULL
+        );
+    """)
+    conexion.commit()
+    conexion.close()
+
+    return None
+
+def agregar_info(info):
+
+    conexion = sqlite3.connect("Staturno_DV_01.db")
+    cursor = conexion.cursor()
+    cursor.execute("""INSERT INTO condador (
+        id,
+        name_1, 
+        service_id_2, 
+        fecha_3) VALUES (NULL,?, ?, ?);""", info)
+    conexion.commit()
+    conexion.close()
+```
+Una vez listo vamos al archivo `./actions/actions.py` y realizamos la coneccion con la base de datos
+Vamos a guardar en nuestra base de datos la informacion del menu que el usuario selecciona, y la fecha en que lo escoge.
+
+`./actions/actions.py`
+```py
+import base_datos # Data base
+
+#===========Check database=================
+base_datos.newdatabase()
+
+class ActionSelectMenu(Action):
+    def name(self) -> Text:
+        return 'action_select_menu'
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        menu = tracker.slots['menu']
+        if menu == "Servicios":
+            dispatcher.utter_message(template='utter_servicios_menu')
+            menu_db = (menu, 'Service_01', datetime.datetime.now())
+            #save user in the data
+            try:
+                base_datos.agregar_info(menu_db)
+            except:
+                dispatcher.utter_message(text="Somenthing went wrong, try again later")
+            return [SlotSet('menu', menu)]
+        elif menu == "Planifiquemos":
+            dispatcher.utter_message(template='utter_planificacion')
+            menu_db = (menu, 'Service_02', datetime.datetime.now())
+            #save user in the data
+            try:
+                base_datos.agregar_info(menu_db)
+            except:
+                dispatcher.utter_message(text="Somenthing went wrong, try again later")
+            return [SlotSet('menu', menu)]
+        elif menu == "Comunicarse":
+            dispatcher.utter_message(template='utter_representante')
+            menu_db = (menu, 'Service_03', datetime.datetime.now())
+            #save user in the data
+            try:
+                base_datos.agregar_info(menu_db)
+            except:
+                dispatcher.utter_message(text="Somenthing went wrong, try again later")
+            return [SlotSet('menu', menu)]
+        else:
+            dispatcher.utter_message(template='utter_default')
+            return []
+```
+De esta forma hemos creado la tabla *contador* y le hemos agregado informacion por medio de actions.
